@@ -1,0 +1,6 @@
+{
+	"commands": [
+		[ "go", "fmt" ],
+		[ "go", "build" ]
+	]
+}
