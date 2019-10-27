@@ -1,6 +1,13 @@
 {
+	"watch" : {
+		"patterns" : [
+			"*.go",
+			"go.mod"
+		]
+	},
 	"commands": [
 		[ "go", "fmt" ],
+		[ "go", "vet" ],
 		[ "go", "build" ]
 	]
 }
