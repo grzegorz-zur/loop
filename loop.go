@@ -4,12 +4,14 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/fsnotify/fsnotify"
+	"io"
 	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
 	"path"
 	"strings"
+	"syscall"
 )
 
 const (
@@ -36,6 +38,7 @@ type Loop struct {
 	Watch    Watch
 	Commands [][]string
 	Run      []string
+	run      *exec.Cmd
 }
 
 type Watch struct {
@@ -53,6 +56,7 @@ func NewLoop() *Loop {
 }
 
 func (l *Loop) Loop() error {
+	defer l.Stop()
 	for {
 		err := l.Execute()
 		if err != nil {
@@ -92,10 +96,54 @@ func (l *Loop) Execute() error {
 }
 
 func (l *Loop) Start() error {
+	if l.Run == nil {
+		return nil
+	}
+	log.Println(strings.Join(l.Run, " "))
+	l.run = exec.Command(l.Run[0], l.Run[1:]...)
+
+	i, err := l.run.StdinPipe()
+	if err != nil {
+		return err
+	}
+	go io.Copy(i, os.Stdin)
+
+	o, err := l.run.StdoutPipe()
+	if err != nil {
+		return err
+	}
+	go io.Copy(os.Stdout, o)
+
+	e, err := l.run.StderrPipe()
+	if err != nil {
+		return err
+	}
+	go io.Copy(os.Stderr, e)
+
+	err = l.run.Start()
+	if err != nil {
+		var exit *exec.ExitError
+		if !errors.As(err, &exit) {
+			return err
+		}
+	}
+
 	return nil
 }
 
 func (l *Loop) Stop() error {
+	if l.run == nil || l.run.Process == nil {
+		return nil
+	}
+	err := l.run.Process.Signal(syscall.SIGTERM)
+	if err != nil {
+		return err
+	}
+	err = l.run.Wait()
+	if err != nil {
+		return err
+	}
+	l.run = nil
 	return nil
 }
 

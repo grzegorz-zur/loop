@@ -8,6 +8,7 @@
 	"commands": [
 		[ "go", "fmt" ],
 		[ "go", "vet" ],
-		[ "go", "build" ]
+		[ "go", "build" ],
+		[ "go", "install" ]
 	]
 }
