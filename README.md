@@ -4,22 +4,10 @@ Minimalistic task runner.
 
 ## Installation
 
-### Install
-
-```
-go get github.com/grzegorz-zur/loop
-```
-
-### Update
+To install or update run the following command.
 
 ```
 go get -u github.com/grzegorz-zur/loop
-```
-
-### Uninstall
-
-```
-go clean -i -r -cache -modcache github.com/grzegorz-zur/loop
 ```
 
 ## Configuration
