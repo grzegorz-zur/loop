@@ -79,17 +79,20 @@ func (l *Loop) Loop() error {
 
 func (l *Loop) Execute() error {
 	for _, c := range l.Commands {
-		log.Println(strings.Join(c, " "))
+		text := strings.Join(c, " ")
 		cmd := exec.Command(c[0], c[1:]...)
 		data, err := cmd.CombinedOutput()
-		os.Stdout.Write(data)
+		defer os.Stdout.Write(data)
 		if err != nil {
+			failure(text)
 			var exit *exec.ExitError
 			if errors.As(err, &exit) {
 				break
 			} else {
 				return err
 			}
+		} else {
+			success(text)
 		}
 	}
 	return nil
@@ -99,7 +102,6 @@ func (l *Loop) Start() error {
 	if l.Run == nil {
 		return nil
 	}
-	log.Println(strings.Join(l.Run, " "))
 	l.run = exec.Command(l.Run[0], l.Run[1:]...)
 
 	i, err := l.run.StdinPipe()
@@ -120,12 +122,16 @@ func (l *Loop) Start() error {
 	}
 	go io.Copy(os.Stderr, e)
 
+	t := strings.Join(l.Run, " ")
 	err = l.run.Start()
 	if err != nil {
+		failure(t)
 		var exit *exec.ExitError
 		if !errors.As(err, &exit) {
 			return err
 		}
+	} else {
+		success(t)
 	}
 
 	return nil
@@ -184,4 +190,12 @@ func (l *Loop) match(e fsnotify.Event) (bool, error) {
 		}
 	}
 	return false, nil
+}
+
+func success(text string) {
+	log.Println("\033[32m" + text + "\033[39;49m")
+}
+
+func failure(text string) {
+	log.Println("\033[31m" + text + "\033[39;49m")
 }
