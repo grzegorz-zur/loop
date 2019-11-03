@@ -82,12 +82,12 @@ func (l *Loop) Loop() error {
 
 func (l *Loop) Execute() error {
 	for _, c := range l.Commands {
-		text := strings.Join(c, " ")
+		t := strings.Join(c, " ")
 		cmd := exec.Command(c[0], c[1:]...)
 		data, err := cmd.CombinedOutput()
 		defer os.Stdout.Write(data)
 		if err != nil {
-			failure(text)
+			failure(t)
 			var exit *exec.ExitError
 			if errors.As(err, &exit) {
 				break
@@ -95,7 +95,7 @@ func (l *Loop) Execute() error {
 				return err
 			}
 		} else {
-			success(text)
+			success(t)
 		}
 	}
 	return nil
@@ -129,14 +129,10 @@ func (l *Loop) Start() error {
 	err = l.run.Start()
 	if err != nil {
 		failure(t)
-		var exit *exec.ExitError
-		if !errors.As(err, &exit) {
-			return err
-		}
-	} else {
-		success(t)
+		return err
 	}
 
+	success(t)
 	return nil
 }
 
@@ -144,15 +140,18 @@ func (l *Loop) Stop() error {
 	if l.run == nil || l.run.Process == nil {
 		return nil
 	}
+	defer func() {
+		l.run = nil
+	}()
 	err := l.run.Process.Signal(syscall.SIGTERM)
 	if err != nil {
 		return err
 	}
 	err = l.run.Wait()
-	if err != nil {
+	var exit *exec.ExitError
+	if err != nil && !errors.As(err, &exit) {
 		return err
 	}
-	l.run = nil
 	return nil
 }
 
