@@ -16,6 +16,9 @@ import (
 
 const (
 	Config = ".loop.json"
+	red    = "\033[31m"
+	green  = "\033[32m"
+	reset  = "\033[39;49m"
 )
 
 func main() {
@@ -193,9 +196,9 @@ func (l *Loop) match(e fsnotify.Event) (bool, error) {
 }
 
 func success(text string) {
-	log.Println("\033[32m" + text + "\033[39;49m")
+	log.Println(green + text + reset)
 }
 
 func failure(text string) {
-	log.Println("\033[31m" + text + "\033[39;49m")
+	log.Println(red + text + reset)
 }
