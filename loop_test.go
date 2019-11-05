@@ -1,10 +1,13 @@
 package main
 
 import (
+	"log"
+	"os"
 	"testing"
 )
 
 func TestStartStopTerminated(t *testing.T) {
+	defer quiet()()
 	l := NewLoop()
 	l.Run = []string{"true"}
 	err := l.Start()
@@ -18,6 +21,7 @@ func TestStartStopTerminated(t *testing.T) {
 }
 
 func TestStartStopDaemon(t *testing.T) {
+	defer quiet()()
 	l := NewLoop()
 	l.Run = []string{"sleep", "1m"}
 	err := l.Start()
@@ -31,6 +35,7 @@ func TestStartStopDaemon(t *testing.T) {
 }
 
 func TestStartStowWrongCommand(t *testing.T) {
+	defer quiet()()
 	l := NewLoop()
 	l.Run = []string{"abcdefghijklmnopqrstuwxyz"}
 	err := l.Start()
@@ -40,5 +45,21 @@ func TestStartStowWrongCommand(t *testing.T) {
 	err = l.Stop()
 	if err != nil {
 		t.Fatal(err)
+	}
+}
+
+func quiet() func() {
+	sout := os.Stdout
+	serr := os.Stderr
+	os.Stdout, _ = os.Open(os.DevNull)
+	os.Stderr, _ = os.Open(os.DevNull)
+	null, _ := os.Open(os.DevNull)
+	log.SetOutput(null)
+	return func() {
+		os.Stdout.Close()
+		os.Stderr.Close()
+		os.Stdout = sout
+		os.Stderr = serr
+		log.SetOutput(os.Stderr)
 	}
 }
