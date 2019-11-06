@@ -6,6 +6,45 @@ import (
 	"testing"
 )
 
+func TestExecute(t *testing.T) {
+	defer quiet()()
+	l := NewLoop()
+	l.Commands = [][]string{{"true"}}
+	ok, err := l.Execute()
+	if !ok {
+		t.Error("not ok")
+	}
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestExecuteFail(t *testing.T) {
+	defer quiet()()
+	l := NewLoop()
+	l.Commands = [][]string{{"false", "true"}}
+	ok, err := l.Execute()
+	if ok {
+		t.Error("ok")
+	}
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestExecuteInvalid(t *testing.T) {
+	defer quiet()()
+	l := NewLoop()
+	l.Commands = [][]string{{"abcdefghijklmnopqrstuwxyz"}}
+	ok, err := l.Execute()
+	if ok {
+		t.Error("ok")
+	}
+	if err == nil {
+		t.Error("no error")
+	}
+}
+
 func TestStartStopTerminated(t *testing.T) {
 	defer quiet()()
 	l := NewLoop()
@@ -34,7 +73,7 @@ func TestStartStopDaemon(t *testing.T) {
 	}
 }
 
-func TestStartStowWrongCommand(t *testing.T) {
+func TestStartStopInvalid(t *testing.T) {
 	defer quiet()()
 	l := NewLoop()
 	l.Run = []string{"abcdefghijklmnopqrstuwxyz"}
@@ -49,15 +88,14 @@ func TestStartStowWrongCommand(t *testing.T) {
 }
 
 func quiet() func() {
+	null, _ := os.Open(os.DevNull)
 	sout := os.Stdout
 	serr := os.Stderr
-	os.Stdout, _ = os.Open(os.DevNull)
-	os.Stderr, _ = os.Open(os.DevNull)
-	null, _ := os.Open(os.DevNull)
+	os.Stdout = null
+	os.Stderr = null
 	log.SetOutput(null)
 	return func() {
-		os.Stdout.Close()
-		os.Stderr.Close()
+		defer null.Close()
 		os.Stdout = sout
 		os.Stderr = serr
 		log.SetOutput(os.Stderr)

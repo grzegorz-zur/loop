@@ -61,26 +61,30 @@ func NewLoop() *Loop {
 func (l *Loop) Loop() error {
 	defer l.Stop()
 	for {
-		err := l.Execute()
+		ok, err := l.Execute()
 		if err != nil {
 			return err
 		}
-		err = l.Start()
-		if err != nil {
-			return err
+		if ok {
+			err = l.Start()
+			if err != nil {
+				return err
+			}
 		}
 		err = l.Wait()
 		if err != nil {
 			return err
 		}
-		err = l.Stop()
-		if err != nil {
-			return err
+		if ok {
+			err = l.Stop()
+			if err != nil {
+				return err
+			}
 		}
 	}
 }
 
-func (l *Loop) Execute() error {
+func (l *Loop) Execute() (bool, error) {
 	for _, c := range l.Commands {
 		t := strings.Join(c, " ")
 		cmd := exec.Command(c[0], c[1:]...)
@@ -90,15 +94,15 @@ func (l *Loop) Execute() error {
 			failure(t)
 			var exit *exec.ExitError
 			if errors.As(err, &exit) {
-				break
+				return false, nil
 			} else {
-				return err
+				return false, err
 			}
 		} else {
 			success(t)
 		}
 	}
-	return nil
+	return true, nil
 }
 
 func (l *Loop) Start() error {
