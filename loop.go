@@ -89,9 +89,9 @@ func (l *Loop) Execute() (bool, error) {
 		t := strings.Join(c, " ")
 		cmd := exec.Command(c[0], c[1:]...)
 		data, err := cmd.CombinedOutput()
-		defer os.Stdout.Write(data)
 		if err != nil {
 			failure(t)
+			os.Stdout.Write(data)
 			var exit *exec.ExitError
 			if errors.As(err, &exit) {
 				return false, nil
@@ -100,6 +100,7 @@ func (l *Loop) Execute() (bool, error) {
 			}
 		} else {
 			success(t)
+			os.Stdout.Write(data)
 		}
 	}
 	return true, nil
