@@ -1,0 +1,10 @@
+version: 2
+jobs:
+    build:
+        docker:
+            - image: circleci/golang:1.13
+        steps:
+            - checkout
+            - run: go test -v -race -covermode=atomic -coverprofile=coverage.out
+            - run: go get github.com/schrej/godacov
+            - run: godacov -t $CODACY_TOKEN -r ./coverage.out -c $CIRCLE_SHA1
