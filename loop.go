@@ -86,11 +86,11 @@ func (l *Loop) Loop() error {
 
 func (l *Loop) Execute() (bool, error) {
 	for _, c := range l.Commands {
-		t := strings.Join(c, " ")
+		text := strings.Join(c, " ")
 		cmd := exec.Command(c[0], c[1:]...)
 		data, err := cmd.CombinedOutput()
 		if err != nil {
-			failure(t)
+			failure(text)
 			os.Stdout.Write(data)
 			var exit *exec.ExitError
 			if errors.As(err, &exit) {
@@ -98,10 +98,9 @@ func (l *Loop) Execute() (bool, error) {
 			} else {
 				return false, err
 			}
-		} else {
-			success(t)
-			os.Stdout.Write(data)
 		}
+		success(text)
+		os.Stdout.Write(data)
 	}
 	return true, nil
 }
@@ -130,14 +129,14 @@ func (l *Loop) Start() error {
 	}
 	go io.Copy(os.Stderr, e)
 
-	t := strings.Join(l.Run, " ")
+	text := strings.Join(l.Run, " ")
 	err = l.run.Start()
 	if err != nil {
-		failure(t)
+		failure(text)
 		return err
 	}
 
-	success(t)
+	success(text)
 	return nil
 }
 
