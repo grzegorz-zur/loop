@@ -12,7 +12,7 @@ Minimalistic task runner.
 
 To install or update run the following command.
 
-```
+```sh
 go get -u github.com/grzegorz-zur/loop
 ```
 
@@ -22,7 +22,7 @@ Create `.loop.json`.
 
 ### Defaults
 
-```
+```json
 {
 	"watch" : {
 		"directories" : [
@@ -37,7 +37,7 @@ Create `.loop.json`.
 
 ### Example
 
-```
+```json
 {
 	"watch" : {
 		"directories" : [
@@ -60,7 +60,6 @@ Create `.loop.json`.
 
 ## Usage
 
-```
+```sh
 loop
 ```
-
