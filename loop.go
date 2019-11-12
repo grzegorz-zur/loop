@@ -15,7 +15,8 @@ import (
 )
 
 const (
-	Config = ".loop.json" // Configuration file name
+	// Config hold name of the configuration file.
+	Config = ".loop.json"
 	red    = "\033[31m"
 	green  = "\033[32m"
 	reset  = "\033[39;49m"
