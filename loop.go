@@ -89,9 +89,9 @@ func (l *Loop) Loop() error {
 	}
 }
 
-// Execute executes seqance of commands from list.
+// Execute executes sequance of commands from list.
 //
-// Returns true when all commands suceeded and false otherwise.
+// Returns true when all commands succeeded and false otherwise.
 func (l *Loop) Execute() (bool, error) {
 	for _, c := range l.Commands {
 		text := strings.Join(c, " ")
