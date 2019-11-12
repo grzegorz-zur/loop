@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	Config = ".loop.json"
+	Config = ".loop.json" // Configuration file name
 	red    = "\033[31m"
 	green  = "\033[32m"
 	reset  = "\033[39;49m"
@@ -37,6 +37,7 @@ func main() {
 	}
 }
 
+// Loop structure.
 type Loop struct {
 	Watch    Watch
 	Commands [][]string
@@ -44,11 +45,13 @@ type Loop struct {
 	run      *exec.Cmd
 }
 
+// Watch structure.
 type Watch struct {
 	Directories []string
 	Patterns    []string
 }
 
+// NewLoop creates new Loop object with default settings.
 func NewLoop() *Loop {
 	return &Loop{
 		Watch: Watch{
@@ -58,6 +61,7 @@ func NewLoop() *Loop {
 	}
 }
 
+// Loop runs endlessly.
 func (l *Loop) Loop() error {
 	defer l.Stop()
 	for {
@@ -84,6 +88,9 @@ func (l *Loop) Loop() error {
 	}
 }
 
+// Execute executes seqance of commands from list.
+//
+// Returns true when all commands suceeded and false otherwise.
 func (l *Loop) Execute() (bool, error) {
 	for _, c := range l.Commands {
 		text := strings.Join(c, " ")
@@ -104,6 +111,7 @@ func (l *Loop) Execute() (bool, error) {
 	return true, nil
 }
 
+// Start starts the command set in `run` fields.
 func (l *Loop) Start() error {
 	if l.Run == nil {
 		return nil
@@ -139,6 +147,7 @@ func (l *Loop) Start() error {
 	return nil
 }
 
+// Stop stops the running command.
 func (l *Loop) Stop() error {
 	if l.run == nil || l.run.Process == nil {
 		return nil
@@ -158,6 +167,7 @@ func (l *Loop) Stop() error {
 	return nil
 }
 
+// Wait waits for file changes.
 func (l *Loop) Wait() error {
 	w, err := fsnotify.NewWatcher()
 	if err != nil {
