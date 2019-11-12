@@ -1,9 +1,11 @@
 package main
 
 import (
+	"io/ioutil"
 	"log"
 	"os"
 	"testing"
+	"time"
 )
 
 func TestExecute(t *testing.T) {
@@ -82,6 +84,31 @@ func TestStartStopInvalid(t *testing.T) {
 		t.Fatal("error expected")
 	}
 	err = l.Stop()
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestWait(t *testing.T) {
+	defer quiet()()
+	l := NewLoop()
+	w := make(chan error)
+	go func() {
+		for {
+			ioutil.WriteFile("test", []byte{}, 0644)
+			time.Sleep(1 * time.Millisecond)
+		}
+	}()
+	go func() {
+		w <- l.Wait()
+		close(w)
+	}()
+	var err error
+	select {
+	case err = <-w:
+	case <-time.After(1 * time.Second):
+		t.Fatal("timeout")
+	}
 	if err != nil {
 		t.Fatal(err)
 	}
