@@ -95,9 +95,8 @@ func (l *Loop) Execute() (bool, error) {
 			var exit *exec.ExitError
 			if errors.As(err, &exit) {
 				return false, nil
-			} else {
-				return false, err
 			}
+			return false, err
 		}
 		success(text)
 		os.Stdout.Write(data)
