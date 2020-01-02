@@ -6,9 +6,10 @@
 		]
 	},
 	"commands": [
-		[ "go", "fmt" ],
+		[ "gofmt", "-s", "-w", "." ],
+		[ "golint", "-set_exit_status" ],
 		[ "go", "vet" ],
 		[ "go", "build" ],
-		[ "go", "test" ]
+		[ "go", "test", "-cover", "-timeout", "5s" ]
 	]
 }

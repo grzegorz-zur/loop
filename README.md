@@ -4,9 +4,9 @@ Minimalistic task runner.
 
 ## Status
 
-[![CircleCI](https://circleci.com/gh/grzegorz-zur/loop.svg?style=svg)](https://circleci.com/gh/grzegorz-zur/loop)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/936a0d49701e4517813c9def722b21dd)](https://www.codacy.com/manual/grzegorz.zur/loop?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=grzegorz-zur/loop&amp;utm_campaign=Badge_Grade)
-[![Codacy Badge](https://api.codacy.com/project/badge/Coverage/936a0d49701e4517813c9def722b21dd)](https://www.codacy.com/manual/grzegorz.zur/loop?utm_source=github.com&utm_medium=referral&utm_content=grzegorz-zur/loop&utm_campaign=Badge_Coverage)
+[![Actions](https://github.com/grzegorz-zur/loop/workflows/Test/badge.svg)](https://github.com/grzegorz-zur/loop/actions)
+[![Go Report Card](https://goreportcard.com/badge/github.com/grzegorz-zur/loop)](https://goreportcard.com/report/github.com/grzegorz-zur/loop)
+[![codecov](https://codecov.io/gh/grzegorz-zur/loop/branch/master/graph/badge.svg)](https://codecov.io/gh/grzegorz-zur/loop)
 
 ## Installation
 
