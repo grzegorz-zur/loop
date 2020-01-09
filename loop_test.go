@@ -11,7 +11,7 @@ import (
 func TestExecute(t *testing.T) {
 	defer quiet()()
 	l := NewLoop()
-	l.Commands = [][]string{{"true"}}
+	l.Commands = []*Command{{Exec: "true"}}
 	ok, err := l.Execute()
 	if !ok {
 		t.Error("not ok")
@@ -24,7 +24,7 @@ func TestExecute(t *testing.T) {
 func TestExecuteFail(t *testing.T) {
 	defer quiet()()
 	l := NewLoop()
-	l.Commands = [][]string{{"false", "true"}}
+	l.Commands = []*Command{{Exec: "false"}, {Exec: "true"}}
 	ok, err := l.Execute()
 	if ok {
 		t.Error("ok")
@@ -37,7 +37,7 @@ func TestExecuteFail(t *testing.T) {
 func TestExecuteInvalid(t *testing.T) {
 	defer quiet()()
 	l := NewLoop()
-	l.Commands = [][]string{{"abcdefghijklmnopqrstuwxyz"}}
+	l.Commands = []*Command{{Exec: "abcdefghijklmnopqrstuwxyz"}}
 	ok, err := l.Execute()
 	if ok {
 		t.Error("ok")
@@ -50,12 +50,12 @@ func TestExecuteInvalid(t *testing.T) {
 func TestStartStopTerminated(t *testing.T) {
 	defer quiet()()
 	l := NewLoop()
-	l.Run = []string{"true"}
-	err := l.Start()
+	l.Run = &Command{Exec: "true"}
+	err := l.Run.Start()
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = l.Stop()
+	_, err = l.Run.Stop()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -64,12 +64,12 @@ func TestStartStopTerminated(t *testing.T) {
 func TestStartStopDaemon(t *testing.T) {
 	defer quiet()()
 	l := NewLoop()
-	l.Run = []string{"sleep", "1m"}
-	err := l.Start()
+	l.Run = &Command{Exec: "sleep", Args: []string{"1m"}}
+	err := l.Run.Start()
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = l.Stop()
+	_, err = l.Run.Stop()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -78,12 +78,12 @@ func TestStartStopDaemon(t *testing.T) {
 func TestStartStopInvalid(t *testing.T) {
 	defer quiet()()
 	l := NewLoop()
-	l.Run = []string{"abcdefghijklmnopqrstuwxyz"}
-	err := l.Start()
+	l.Run = &Command{Exec: "abcdefghijklmnopqrstuwxyz"}
+	err := l.Run.Start()
 	if err == nil {
 		t.Fatal("error expected")
 	}
-	err = l.Stop()
+	_, err = l.Run.Stop()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -100,7 +100,7 @@ func TestWait(t *testing.T) {
 		}
 	}()
 	go func() {
-		w <- l.Wait()
+		w <- l.Watch.Wait()
 		close(w)
 	}()
 	var err error
@@ -108,6 +108,25 @@ func TestWait(t *testing.T) {
 	case err = <-w:
 	case <-time.After(1 * time.Second):
 		t.Fatal("timeout")
+	}
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestEnv(t *testing.T) {
+	defer quiet()()
+	l := NewLoop()
+	l.Commands = []*Command{
+		{
+			Env:  map[string]string{"TEST": "x"},
+			Exec: "bash",
+			Args: []string{"-uc", "test x=$TEST"},
+		},
+	}
+	ok, err := l.Execute()
+	if !ok {
+		t.Fatal("not ok")
 	}
 	if err != nil {
 		t.Fatal(err)

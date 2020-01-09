@@ -40,7 +40,7 @@ Create `.loop.json`.
 ```json
 {
 	"watch" : {
-		"directories" : [
+		"dirs" : [
 			".",
 			"cmd/app"
 		],
@@ -50,11 +50,38 @@ Create `.loop.json`.
 		]
 	},
 	"commands": [
-		[ "go", "fmt", "./..." ],
-		[ "go", "vet" , "./..."],
-		[ "go", "build" , "./cmd/app"]
+		{
+			"exec": "gofmt",
+			"args": [ "-s", "-w", "./..." ]
+		},
+		{
+			"exec": "golint",
+			"args": [ "-set_exit_status", "./..." ]
+		},
+		{
+			"exec": "go",
+			"args": [ "vet", "./..." ]
+		},
+		{
+			"exec": "go",
+			"args": [ "build", "./..." ]
+		},
+		{
+			"exec": "go",
+			"args": [ "test", "-timeout", "5s", "./..." ]
+		},
+		{
+			"exec": "go",
+			"args": [ "test", "-timeout", "5s", "-race", "-cover", "./..." ],
+			"env": {
+				"CGO_ENABLED": "1"
+			}
+		}
 	],
-	"run" : [ "./app", "-addr=:8443" ]
+	"run" : {
+		"exec": "./app",
+		"args": [ "-addr=:8443" ]
+	}
 }
 ```
 

@@ -6,10 +6,32 @@
 		]
 	},
 	"commands": [
-		[ "gofmt", "-s", "-w", "." ],
-		[ "golint", "-set_exit_status" ],
-		[ "go", "vet" ],
-		[ "go", "build" ],
-		[ "go", "test", "-cover", "-timeout", "5s" ]
+		{
+			"exec": "gofmt",
+			"args": [ "-s", "-w", "." ]
+		},
+		{
+			"exec": "golint",
+			"args": [ "-set_exit_status" ]
+		},
+		{
+			"exec": "go",
+			"args": [ "vet" ]
+		},
+		{
+			"exec": "go",
+			"args": [ "build" ]
+		},
+		{
+			"exec": "go",
+			"args": [ "test", "-timeout", "5s" ]
+		},
+		{
+			"exec": "go",
+			"args": [ "test", "-timeout", "5s", "-race", "-cover" ],
+			"env": {
+				"CGO_ENABLED": "1"
+			}
+		}
 	]
 }
