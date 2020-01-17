@@ -7,8 +7,7 @@ import (
 )
 
 const (
-	// Config hold name of the configuration file.
-	Config = ".loop.json"
+	config = ".loop.json"
 )
 
 const (
@@ -18,8 +17,8 @@ const (
 )
 
 func main() {
-	loop := NewLoop()
-	data, err := ioutil.ReadFile(Config)
+	loop := &Loop{}
+	data, err := ioutil.ReadFile(config)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -1,11 +1,12 @@
 {
-	"watch" : {
-		"patterns" : [
-			"*.go",
-			"go.mod"
-		]
-	},
-	"commands": [
+	"include" : [
+		"*.go",
+		"go.mod"
+	],
+	"exclude" : [
+		".*"
+	],
+	"execute": [
 		{
 			"exec": "gofmt",
 			"args": [ "-s", "-w", "." ]

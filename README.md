@@ -20,36 +20,18 @@ go get -u github.com/grzegorz-zur/loop
 
 Create `.loop.json`.
 
-### Defaults
-
-```json
-{
-	"watch" : {
-		"directories" : [
-			"."
-		],
-		"patterns" : [
-			"*"
-		]
-	}
-}
-```
-
 ### Example
 
 ```json
 {
-	"watch" : {
-		"dirs" : [
-			".",
-			"cmd/app"
-		],
-		"patterns" : [
-			"*.go",
-			"go.mod"
-		]
-	},
-	"commands": [
+	"include" : [
+		"*.go",
+		"go.mod"
+	],
+	"exclude" : [
+		".*"
+	],
+	"execute": [
 		{
 			"exec": "gofmt",
 			"args": [ "-s", "-w", "./..." ]

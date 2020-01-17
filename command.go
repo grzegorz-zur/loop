@@ -17,92 +17,91 @@ type Command struct {
 	process *os.Process
 }
 
-func (c *Command) String() string {
+func (cmd *Command) String() string {
 	text := strings.Builder{}
-	if c.Dir != "" {
-		text.WriteString(c.Dir)
+	if cmd.Dir != "" {
+		text.WriteString(cmd.Dir)
 		text.WriteString(" ")
 	}
-	if len(c.Env) != 0 {
-		for k, v := range c.Env {
-			text.WriteString(k)
+	if len(cmd.Env) != 0 {
+		for name, value := range cmd.Env {
+			text.WriteString(name)
 			text.WriteString("=")
-			text.WriteString(v)
+			text.WriteString(value)
 		}
 		text.WriteString(" ")
 	}
-	text.WriteString(c.Exec)
-	if len(c.Args) != 0 {
+	text.WriteString(cmd.Exec)
+	if len(cmd.Args) != 0 {
 		text.WriteString(" ")
-		text.WriteString(strings.Join(c.Args, " "))
+		args := strings.Join(cmd.Args, " ")
+		text.WriteString(args)
 	}
 	return text.String()
 }
 
-// Execute executes sequance of commands from list.
-//
-// Returns true when all commands succeeded and false otherwise.
-func (c *Command) Execute() (bool, error) {
-	err := c.Start()
+// Run starts and waits for command to finish.
+func (cmd *Command) Run() (ok bool, err error) {
+	err = cmd.Start()
 	if err != nil {
 		return false, err
 	}
-	return c.Wait()
+	return cmd.Wait()
 }
 
-// Start starts the command set in `run` fields.
-func (c *Command) Start() error {
-	attr := c.attr()
-	exe, err := exec.LookPath(c.Exec)
+// Start starts the command.
+func (cmd *Command) Start() error {
+	attr := cmd.attr()
+	exe, err := exec.LookPath(cmd.Exec)
 	if err != nil {
 		return err
 	}
-	args := make([]string, 0, len(c.Args)+1)
-	args = append(args, c.Exec)
-	args = append(args, c.Args...)
-	c.process, err = os.StartProcess(exe, args, attr)
+	args := make([]string, 0, len(cmd.Args)+1)
+	args = append(args, cmd.Exec)
+	args = append(args, cmd.Args...)
+	cmd.process, err = os.StartProcess(exe, args, attr)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (c *Command) attr() *os.ProcAttr {
+// Stop stops the running command.
+func (cmd *Command) Stop() (ok bool, err error) {
+	if cmd.process == nil {
+		return true, nil
+	}
+	err = cmd.process.Signal(syscall.SIGTERM)
+	if err != nil {
+		return false, err
+	}
+	return cmd.Wait()
+}
+
+// Wait waits for process end returns result.
+func (cmd *Command) Wait() (ok bool, err error) {
+	if cmd.process == nil {
+		return true, nil
+	}
+	defer func() {
+		cmd.process = nil
+	}()
+	state, err := cmd.process.Wait()
+	ok = state.Success()
+	return ok, err
+}
+
+func (cmd *Command) attr() *os.ProcAttr {
 	env := []string{}
-	for k, v := range c.Env {
-		e := fmt.Sprintf("%s=%s", k, v)
-		env = append(env, e)
+	for name, value := range cmd.Env {
+		entry := fmt.Sprintf("%s=%s", name, value)
+		env = append(env, entry)
 	}
 	env = append(env, os.Environ()...)
 	files := []*os.File{os.Stdin, os.Stdout, os.Stderr}
 	return &os.ProcAttr{
-		Dir:   c.Dir,
+		Dir:   cmd.Dir,
 		Env:   env,
 		Files: files,
 	}
-}
-
-// Stop stops the running command.
-func (c *Command) Stop() (bool, error) {
-	if c.process == nil {
-		return true, nil
-	}
-	err := c.process.Signal(syscall.SIGTERM)
-	if err != nil {
-		return false, err
-	}
-	return c.Wait()
-}
-
-// Wait waits for process end returns result.
-func (c *Command) Wait() (bool, error) {
-	if c.process == nil {
-		return true, nil
-	}
-	defer func() {
-		c.process = nil
-	}()
-	state, err := c.process.Wait()
-	ok := state.Success()
-	return ok, err
 }
