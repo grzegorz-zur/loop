@@ -8,9 +8,9 @@ import (
 type Patterns []string
 
 // Match checks if name matches any pattern.
-func (ptrns Patterns) Match(name string) (match bool, err error) {
-	for _, ptrn := range ptrns {
-		match, err := filepath.Match(ptrn, name)
+func (patterns Patterns) Match(name string) (match bool, err error) {
+	for _, pattern := range patterns {
+		match, err := filepath.Match(pattern, name)
 		if err != nil {
 			return false, err
 		}

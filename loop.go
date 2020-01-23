@@ -15,26 +15,26 @@ type Loop struct {
 }
 
 // Loop loops endlessly.
-func (lp *Loop) Loop() error {
-	defer lp.Stop()
+func (loop *Loop) Loop() error {
+	defer loop.Stop()
 	for {
-		ok, err := lp.Execute()
+		ok, err := loop.Execute()
 		if err != nil {
 			return err
 		}
-		if ok && lp.Command != nil {
-			err = lp.Start()
-			status(err == nil, lp.String())
+		if ok && loop.Command != nil {
+			err = loop.Start()
+			status(err == nil, loop.String())
 			if err != nil {
 				return err
 			}
 		}
-		err = lp.Watch()
+		err = loop.Watch()
 		if err != nil {
 			return err
 		}
-		if ok && lp.Command != nil {
-			_, err = lp.Stop()
+		if ok && loop.Command != nil {
+			_, err = loop.Stop()
 			if err != nil {
 				return err
 			}
@@ -43,13 +43,13 @@ func (lp *Loop) Loop() error {
 }
 
 // Watch waits for file changes.
-func (lp *Loop) Watch() error {
+func (loop *Loop) Watch() error {
 	watch, err := fsnotify.NewWatcher()
 	if err != nil {
 		return err
 	}
 	defer watch.Close()
-	err = lp.watch(watch, ".")
+	err = loop.watch(watch, ".")
 	if err != nil {
 		return err
 	}
@@ -57,7 +57,7 @@ func (lp *Loop) Watch() error {
 		select {
 		case event := <-watch.Events:
 			name := filepath.Base(event.Name)
-			match, err := lp.match(name)
+			match, err := loop.match(name)
 			if err != nil {
 				return err
 			}
@@ -70,7 +70,7 @@ func (lp *Loop) Watch() error {
 	}
 }
 
-func (lp *Loop) watch(watch *fsnotify.Watcher, path string) error {
+func (loop *Loop) watch(watch *fsnotify.Watcher, path string) error {
 	err := watch.Add(path)
 	if err != nil {
 		return err
@@ -82,13 +82,13 @@ func (lp *Loop) watch(watch *fsnotify.Watcher, path string) error {
 	for _, file := range files {
 		if file.IsDir() {
 			name := file.Name()
-			match, err := lp.match(name)
+			match, err := loop.match(name)
 			if err != nil {
 				return err
 			}
 			if match {
 				subpath := filepath.Join(path, name)
-				err = lp.watch(watch, subpath)
+				err = loop.watch(watch, subpath)
 				if err != nil {
 					return err
 				}
@@ -98,12 +98,12 @@ func (lp *Loop) watch(watch *fsnotify.Watcher, path string) error {
 	return nil
 }
 
-func (lp *Loop) match(name string) (match bool, err error) {
-	match, err = lp.Include.Match(name)
+func (loop *Loop) match(name string) (match bool, err error) {
+	match, err = loop.Include.Match(name)
 	if !match {
 		return false, err
 	}
-	match, err = lp.Exclude.Match(name)
+	match, err = loop.Exclude.Match(name)
 	if match {
 		return false, err
 	}
