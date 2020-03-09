@@ -21,7 +21,10 @@
 		},
 		{
 			"exec": "go",
-			"args": [ "build" ]
+			"args": [ "build", "-race" ],
+			"env": {
+				"CGO_ENABLED": "1"
+			}
 		},
 		{
 			"exec": "go",
