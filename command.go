@@ -44,24 +44,24 @@ func (cmd *Command) String() string {
 func (cmd *Command) Run() (ok bool, err error) {
 	err = cmd.Start()
 	if err != nil {
-		return false, err
+		return false, fmt.Errorf("error running command %s: %w", cmd, err)
 	}
 	return cmd.Wait()
 }
 
 // Start starts the command.
 func (cmd *Command) Start() error {
-	attr := cmd.attr()
 	exe, err := exec.LookPath(cmd.Exec)
 	if err != nil {
-		return err
+		return fmt.Errorf("error looking for path of %s: %w", cmd.Exec, err)
 	}
 	args := make([]string, 0, len(cmd.Args)+1)
 	args = append(args, cmd.Exec)
 	args = append(args, cmd.Args...)
+	attr := cmd.attr()
 	cmd.process, err = os.StartProcess(exe, args, attr)
 	if err != nil {
-		return err
+		return fmt.Errorf("error starting command %s: %w", cmd, err)
 	}
 	return nil
 }
@@ -73,9 +73,13 @@ func (cmd *Command) Stop() (ok bool, err error) {
 	}
 	err = cmd.process.Signal(syscall.SIGTERM)
 	if err != nil {
-		return false, err
+		return false, fmt.Errorf("error stoping process %d: %w", cmd.process.Pid, err)
 	}
-	return cmd.Wait()
+	ok, err = cmd.Wait()
+	if err != nil {
+		return false, fmt.Errorf("error waiting for process %d: %w", cmd.process.Pid, err)
+	}
+	return ok, nil
 }
 
 // Wait waits for process end returns result.
@@ -87,8 +91,11 @@ func (cmd *Command) Wait() (ok bool, err error) {
 		cmd.process = nil
 	}()
 	state, err := cmd.process.Wait()
+	if err != nil {
+		return false, fmt.Errorf("error waiting for process %d: %w", cmd.process.Pid, err)
+	}
 	ok = state.Success()
-	return ok, err
+	return ok, nil
 }
 
 func (cmd *Command) attr() *os.ProcAttr {

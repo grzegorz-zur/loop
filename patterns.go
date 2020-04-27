@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"path/filepath"
 )
 
@@ -12,7 +13,7 @@ func (patterns Patterns) Match(name string) (match bool, err error) {
 	for _, pattern := range patterns {
 		match, err := filepath.Match(pattern, name)
 		if err != nil {
-			return false, err
+			return false, fmt.Errorf("error matching pattern %s with name %s: %w", pattern, name, err)
 		}
 		if match {
 			return true, nil
